@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Solutions>
+    <element name="Min" type="integer" />
+    <element name="Max" type="xs:integer" />
+    <element name="Quantity" type="xs:insignedInt" />
+    <Solution>
+        <Name>random [min;max)</Name>
+        <Quantity>1</Quantity>
+    </Solution>
+    <Solution>
+        <Name>coin {0,1}</Name>
+        <Quantity>1</Quantity>
+    </Solution>
+    <Solution>
+        <Name>custom words</Name>
+        <Quantity>1</Quantity>
+    </Solution>
+    <Solution>
+        <Name>dice4</Name>
+        <Min>1</Min>
+        <Max>4</Max>
+        <Quantity>1</Quantity>
+    </Solution>
+    <Solution>
+        <Name>dice6</Name>
+        <Min>1</Min>
+        <Max>6</Max>
+        <Quantity>1</Quantity>
+    </Solution>
+    <Solution>
+        <Name>dice8</Name>
+        <Min>1</Min>
+        <Max>8</Max>
+        <Quantity>1</Quantity>
+    </Solution>
+    <Solution>
+        <Name>dice10</Name>
+        <Min>1</Min>
+        <Max>10</Max>
+        <Quantity>1</Quantity>
+    </Solution>
+    <Solution>
+        <Name>dice12</Name>
+        <Min>1</Min>
+        <Max>4</Max>
+        <Quantity>1</Quantity>
+    </Solution>
+    <Solution>
+        <Name>dice20</Name>
+        <Min>1</Min>
+        <Max>4</Max>
+        <Quantity>1</Quantity>
+    </Solution>
+    <Solution>
+        <Name>dice100</Name>
+        <Min>1</Min>
+        <Max>4</Max>
+        <Quantity>1</Quantity>
+    </Solution>
+</Solutions>
