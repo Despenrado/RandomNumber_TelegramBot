@@ -72,10 +72,7 @@ func main() {
 					}
 				}
 				bot.Send(tgbotapi.NewMessage(chatID, "Ok, I remember"))
-				if val, ok := modesMap[userID]; ok {
-					msg := tgbotapi.NewMessage(chatID, "Your \"random\":\nMode: "+val.Name+"\nQuantity: "+strconv.Itoa(int(val.Quantity))+"\nMin: "+strconv.Itoa(val.Min)+"\nMax: "+strconv.Itoa(val.Max)+"\nWords: "+strings.Join(val.Values, ";")+"\n\n/roll for roll")
-					bot.Send(msg)
-				}
+				status(userID, chatID, query, bot)
 			}
 		}
 		if update.Message != nil {
@@ -100,13 +97,20 @@ func main() {
 						row = append(row, btn)
 						buttons.InlineKeyboard = append(buttons.InlineKeyboard, row)
 					}
+					status(userID, chatID, query, bot)
 					msg.ReplyMarkup = buttons
 					bot.Send(msg)
 				case "setquantity":
 					if _, ok := modesMap[userID]; ok {
 						commands := strings.Split(query, " ")
-						modesMap[userID].Quantity, err = strconv.Atoi(commands[1])
-						if err != nil {
+						if len(commands) > 1 {
+							modesMap[userID].Quantity, err = strconv.Atoi(commands[1])
+							if err != nil {
+								msg := tgbotapi.NewMessage(chatID, "wrong format")
+								bot.Send(msg)
+							}
+							status(userID, chatID, query, bot)
+						} else {
 							msg := tgbotapi.NewMessage(chatID, "wrong format")
 							bot.Send(msg)
 						}
@@ -117,8 +121,14 @@ func main() {
 				case "setmin":
 					if _, ok := modesMap[userID]; ok {
 						commands := strings.Split(query, " ")
-						modesMap[userID].Min, err = strconv.Atoi(commands[1])
-						if err != nil {
+						if len(commands) > 1 {
+							modesMap[userID].Min, err = strconv.Atoi(commands[1])
+							if err != nil {
+								msg := tgbotapi.NewMessage(chatID, "wrong format")
+								bot.Send(msg)
+							}
+							status(userID, chatID, query, bot)
+						} else {
 							msg := tgbotapi.NewMessage(chatID, "wrong format")
 							bot.Send(msg)
 						}
@@ -129,8 +139,14 @@ func main() {
 				case "setmax":
 					if _, ok := modesMap[userID]; ok {
 						commands := strings.Split(query, " ")
-						modesMap[userID].Max, err = strconv.Atoi(commands[1])
-						if err != nil {
+						if len(commands) > 1 {
+							modesMap[userID].Max, err = strconv.Atoi(commands[1])
+							if err != nil {
+								msg := tgbotapi.NewMessage(chatID, "wrong format")
+								bot.Send(msg)
+							}
+							status(userID, chatID, query, bot)
+						} else {
 							msg := tgbotapi.NewMessage(chatID, "wrong format")
 							bot.Send(msg)
 						}
@@ -141,10 +157,12 @@ func main() {
 				case "setwords":
 					if _, ok := modesMap[userID]; ok {
 						commands := strings.Split(query, "/setwords ")
-						words := strings.Split(commands[0], ";")
+						log.Println("==================================================" + commands[1])
+						words := strings.Split(commands[1], ";")
 						for _, word := range words {
 							modesMap[userID].Values = append(modesMap[userID].Values, word)
 						}
+						status(userID, chatID, query, bot)
 					} else {
 						msg := tgbotapi.NewMessage(chatID, "please use /setmode before using "+query)
 						bot.Send(msg)
@@ -152,10 +170,16 @@ func main() {
 				case "setminmaxqua":
 					if _, ok := modesMap[userID]; ok {
 						commands := strings.Split(query, " ")
-						modesMap[userID].Min, err = strconv.Atoi(commands[1])
-						modesMap[userID].Max, err = strconv.Atoi(commands[2])
-						modesMap[userID].Quantity, err = strconv.Atoi(commands[3])
-						if err != nil {
+						if len(commands) > 3 {
+							modesMap[userID].Min, err = strconv.Atoi(commands[1])
+							modesMap[userID].Max, err = strconv.Atoi(commands[2])
+							modesMap[userID].Quantity, err = strconv.Atoi(commands[3])
+							if err != nil {
+								msg := tgbotapi.NewMessage(chatID, "wrong format")
+								bot.Send(msg)
+							}
+							status(userID, chatID, query, bot)
+						} else {
 							msg := tgbotapi.NewMessage(chatID, "wrong format")
 							bot.Send(msg)
 						}
@@ -163,6 +187,8 @@ func main() {
 						msg := tgbotapi.NewMessage(chatID, "please use /setmode before using "+query)
 						bot.Send(msg)
 					}
+				case "status":
+					status(userID, chatID, query, bot)
 				case "roll":
 					roll(userID, chatID, query, bot)
 				default:
@@ -170,19 +196,26 @@ func main() {
 					bot.Send(msg)
 				}
 			}
-
-			if val, ok := modesMap[userID]; ok {
-				msg := tgbotapi.NewMessage(chatID, "Your \"random\":\nMode: "+val.Name+"\nQuantity: "+strconv.Itoa(int(val.Quantity))+"\nMin: "+strconv.Itoa(val.Min)+"\nMax: "+strconv.Itoa(val.Max)+"\nWords: "+strings.Join(val.Values, ";")+"\n\n/roll for roll")
-				bot.Send(msg)
-			}
 		}
 	}
 
 }
 
+func status(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
+	if val, ok := modesMap[userID]; ok {
+		msg := tgbotapi.NewMessage(chatID, "Your \"random\":\nMode: "+val.Name+"\nQuantity: "+strconv.Itoa(int(val.Quantity))+"\nMin: "+
+			strconv.Itoa(val.Min)+"\nMax: "+strconv.Itoa(val.Max)+"\nWords: "+strings.Join(val.Values, ";")+
+			"\n\n/help for help\n/roll for roll")
+		bot.Send(msg)
+	} else {
+		msg := tgbotapi.NewMessage(chatID, "Mode not found. Please use /setmode before using "+query)
+		bot.Send(msg)
+	}
+}
+
 func roll(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
 	if val, ok := modesMap[userID]; ok {
-		if val.Max > val.Min {
+		if val.Max > val.Min || len(val.Values) > 0 {
 			sum := 0
 			msgText := "\n"
 			for i := 0; i < val.Quantity; i++ {
@@ -191,7 +224,7 @@ func roll(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
 					sum += tmp
 					msgText += strconv.Itoa(tmp) + "\n"
 				} else {
-					tmp := rand.Intn(val.Max)
+					tmp := rand.Intn(len(val.Values))
 					msgText += val.Values[tmp] + "\n"
 				}
 			}
