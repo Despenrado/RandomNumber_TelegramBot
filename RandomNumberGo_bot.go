@@ -14,16 +14,20 @@ import (
 )
 
 var (
-	modesMap  map[int]*Solution
-	help      = "help"
-	solutions Solutions
+	modesMap map[int]*Mode
+	help     = "help"
+	mods     Modes
 )
 
-type Solutions struct {
-	Solution []Solution `xml:"Solution"`
+type Config struct {
+	TelegramBotToken string
 }
 
-type Solution struct {
+type Modes struct {
+	Mode []Mode `xml:"Mode"`
+}
+
+type Mode struct {
 	Name     string   `xml:"Name"`
 	Min      int      `xml:"Min"`
 	Max      int      `xml:"Max"`
@@ -32,8 +36,8 @@ type Solution struct {
 }
 
 func main() {
-	modesMap = make(map[int]*Solution)
-	solutions, _ = parseSolutions()
+	modesMap = make(map[int]*Mode)
+	mods, _ = parseModes()
 
 	config, err := parceConfig()
 	if err != nil {
@@ -64,7 +68,7 @@ func main() {
 			case "roll":
 				roll(userID, chatID, query, bot)
 			default:
-				for _, mode := range solutions.Solution {
+				for _, mode := range mods.Mode {
 					if query == mode.Name {
 						tmp := mode
 						modesMap[userID] = &tmp
@@ -91,7 +95,7 @@ func main() {
 				case "setmode":
 					msg := tgbotapi.NewMessage(chatID, "Select mode")
 					buttons := tgbotapi.InlineKeyboardMarkup{}
-					for _, mode := range solutions.Solution {
+					for _, mode := range mods.Mode {
 						var row []tgbotapi.InlineKeyboardButton
 						btn := tgbotapi.NewInlineKeyboardButtonData(mode.Name, mode.Name)
 						row = append(row, btn)
@@ -220,7 +224,7 @@ func roll(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
 			msgText := "\n"
 			for i := 0; i < val.Quantity; i++ {
 				if len(val.Values) == 0 {
-					tmp := rand.Intn(val.Max-val.Min) + val.Min
+					tmp := rand.Intn(val.Max+1-val.Min) + val.Min
 					sum += tmp
 					msgText += strconv.Itoa(tmp) + "\n"
 				} else {
@@ -248,20 +252,16 @@ func randomNumber(num1 string, num2 string) (string, error) {
 	return msg, err
 }
 
-type Config struct {
-	TelegramBotToken string
-}
-
-func parseSolutions() (Solutions, error) {
+func parseModes() (Modes, error) {
 	file, err := os.Open("resources.xml")
 	if err != nil {
 		log.Panic(err)
 	}
 	defer file.Close()
 	byteValue, err := ioutil.ReadAll(file)
-	var tmpSolutions Solutions
-	xml.Unmarshal(byteValue, &tmpSolutions)
-	return tmpSolutions, err
+	var tmpModes Modes
+	xml.Unmarshal(byteValue, &tmpModes)
+	return tmpModes, err
 }
 
 func parceConfig() (Config, error) {
@@ -278,21 +278,3 @@ func parceConfig() (Config, error) {
 	}
 	return config, err
 }
-
-// args := strings.Split(query, " ")
-// 			if len(args) > 1 {
-// 				args = append(args[:0], args[1:]...)
-// 			}
-// 			switch command {
-// 			case "help":
-// 				msg = "*there will be help message*"
-// 			case "start":
-// 				msg = "_there will be start message_"
-// 			case "rand":
-// 				msg, err = randomNumber(args[0], args[1])
-// 				if err != nil {
-// 					log.Println(err)
-// 				}
-// 			default:
-// 				msg = "Error"
-// 			}
