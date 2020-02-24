@@ -5,10 +5,14 @@
     <element name="Quantity" type="xs:insignedInt" />
     <Solution>
         <Name>random [min;max)</Name>
+        <Min>1</Min>
+        <Max>1000</Max>
         <Quantity>1</Quantity>
     </Solution>
     <Solution>
         <Name>coin {0,1}</Name>
+        <Min>0</Min>
+        <Max>1</Max>
         <Quantity>1</Quantity>
     </Solution>
     <Solution>
@@ -42,19 +46,19 @@
     <Solution>
         <Name>dice12</Name>
         <Min>1</Min>
-        <Max>4</Max>
+        <Max>12</Max>
         <Quantity>1</Quantity>
     </Solution>
     <Solution>
         <Name>dice20</Name>
         <Min>1</Min>
-        <Max>4</Max>
+        <Max>20</Max>
         <Quantity>1</Quantity>
     </Solution>
     <Solution>
         <Name>dice100</Name>
         <Min>1</Min>
-        <Max>4</Max>
+        <Max>100</Max>
         <Quantity>1</Quantity>
     </Solution>
 </Solutions>
