@@ -113,7 +113,6 @@ func main() {
 					msg := tgbotapi.NewMessage(chatID, "Select template")
 					buttons := tgbotapi.InlineKeyboardMarkup{}
 					for _, template := range templates.Template {
-						log.Println("\n22222222222222222222222222222222222222222222222222222222222222222222222222222222222222\n")
 						var row []tgbotapi.InlineKeyboardButton
 						btn := tgbotapi.NewInlineKeyboardButtonData(template.Name, template.Name)
 						row = append(row, btn)
@@ -248,9 +247,10 @@ func roll(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
 					msgText += val.Values[tmp] + "\n"
 				}
 			}
-			msgText += "sum= " + strconv.Itoa(sum) + "\navg= " + strconv.FormatFloat(float64(sum)/float64(val.Quantity), 'f', -4, 32)
+			msgText += "sum= " + strconv.Itoa(sum) + "\navg= " + strconv.FormatFloat(float64(sum)/float64(val.Quantity), 'f', -4, 32) + "\n/roll again"
 			msg := tgbotapi.NewMessage(chatID, msgText)
 			bot.Send(msg)
+			msg := tgbotapi.NewPhotoUpload(chatID)
 		} else {
 			msg := tgbotapi.NewMessage(chatID, "please use /setmin or /setmax to change numbers, because your max number less than min, before using "+query)
 			bot.Send(msg)
@@ -259,13 +259,6 @@ func roll(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
 		msg := tgbotapi.NewMessage(chatID, "please use /settemplate before using "+query)
 		bot.Send(msg)
 	}
-}
-
-func randomNumber(num1 string, num2 string) (string, error) {
-	max, err := strconv.Atoi(num2)
-	min, err := strconv.Atoi(num1)
-	msg := strconv.Itoa(rand.Intn(max-min) + min)
-	return msg, err
 }
 
 func parseTemplates() (Templates, error) {
