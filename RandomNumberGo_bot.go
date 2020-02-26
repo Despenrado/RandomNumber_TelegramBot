@@ -27,6 +27,7 @@ var (
 		"setminmaxqua [min] [max] [quantity] - sets minimum, maximum and quantity\n" +
 		"setwords [word1;word2;word3] - sets words for random choice\n" +
 		"status - shows your current tamplate of rundom\n" +
+		"random\n" +
 		"roll - genertes random nuber/numbers via current template"
 	templates Templates
 )
@@ -40,11 +41,12 @@ type Templates struct {
 }
 
 type Template struct {
-	Name     string   `xml:"Name"`
-	Min      int      `xml:"Min"`
-	Max      int      `xml:"Max"`
-	Quantity int      `xml:"Quantity"`
-	Values   []string `xml:"Values"`
+	Name      string   `xml:"Name"`
+	Min       int      `xml:"Min"`
+	Max       int      `xml:"Max"`
+	Quantity  int      `xml:"Quantity"`
+	Values    []string `xml:"Values"`
+	ImagePath []string `xml:"ImagePath"`
 }
 
 func main() {
@@ -87,7 +89,7 @@ func main() {
 						break
 					}
 				}
-				bot.Send(tgbotapi.NewMessage(chatID, "Ok, I remember"))
+				sendMessage(bot, chatID, "Ok, I remember")
 				status(userID, chatID, query, bot)
 			}
 		}
@@ -101,14 +103,13 @@ func main() {
 			command = update.Message.Command()
 			if command == "" {
 				//for text
-				bot.Send(tgbotapi.NewMessage(chatID, "/help shows help message"))
+				sendMessage(bot, chatID, "/help shows help message")
 			} else {
 				//for commands
 				switch command {
 				case "start":
-					msg := tgbotapi.NewMessage(chatID, "Welcome to RandomNumber_bot\n"+
+					sendMessage(bot, chatID, "Welcome to RandomNumber_bot\n"+
 						"/help shows help message")
-					bot.Send(msg)
 				case "settemplate":
 					msg := tgbotapi.NewMessage(chatID, "Select template")
 					buttons := tgbotapi.InlineKeyboardMarkup{}
@@ -126,17 +127,14 @@ func main() {
 						if len(commands) > 1 {
 							templatesMap[userID].Quantity, err = strconv.Atoi(commands[1])
 							if err != nil {
-								msg := tgbotapi.NewMessage(chatID, "wrong format")
-								bot.Send(msg)
+								sendMessage(bot, chatID, "wrong format")
 							}
 							status(userID, chatID, query, bot)
 						} else {
-							msg := tgbotapi.NewMessage(chatID, "wrong format")
-							bot.Send(msg)
+							sendMessage(bot, chatID, "wrong format")
 						}
 					} else {
-						msg := tgbotapi.NewMessage(chatID, "please use /settemplate before using "+query)
-						bot.Send(msg)
+						sendMessage(bot, chatID, "please use /settemplate before using "+query)
 					}
 				case "setmin":
 					if _, ok := templatesMap[userID]; ok {
@@ -144,17 +142,15 @@ func main() {
 						if len(commands) > 1 {
 							templatesMap[userID].Min, err = strconv.Atoi(commands[1])
 							if err != nil {
-								msg := tgbotapi.NewMessage(chatID, "wrong format")
-								bot.Send(msg)
+								sendMessage(bot, chatID, "wrong format")
 							}
 							status(userID, chatID, query, bot)
 						} else {
-							msg := tgbotapi.NewMessage(chatID, "wrong format")
-							bot.Send(msg)
+							sendMessage(bot, chatID, "wrong format")
+
 						}
 					} else {
-						msg := tgbotapi.NewMessage(chatID, "please use /settemplate before using "+query)
-						bot.Send(msg)
+						sendMessage(bot, chatID, "please use /settemplate before using "+query)
 					}
 				case "setmax":
 					if _, ok := templatesMap[userID]; ok {
@@ -162,17 +158,14 @@ func main() {
 						if len(commands) > 1 {
 							templatesMap[userID].Max, err = strconv.Atoi(commands[1])
 							if err != nil {
-								msg := tgbotapi.NewMessage(chatID, "wrong format")
-								bot.Send(msg)
+								sendMessage(bot, chatID, "wrong format")
 							}
 							status(userID, chatID, query, bot)
 						} else {
-							msg := tgbotapi.NewMessage(chatID, "wrong format")
-							bot.Send(msg)
+							sendMessage(bot, chatID, "wrong format")
 						}
 					} else {
-						msg := tgbotapi.NewMessage(chatID, "please use /settemplate before using "+query)
-						bot.Send(msg)
+						sendMessage(bot, chatID, "please use /settemplate before using "+query)
 					}
 				case "setwords":
 					if _, ok := templatesMap[userID]; ok {
@@ -183,8 +176,7 @@ func main() {
 						}
 						status(userID, chatID, query, bot)
 					} else {
-						msg := tgbotapi.NewMessage(chatID, "please use /settemplate before using "+query)
-						bot.Send(msg)
+						sendMessage(bot, chatID, "please use /settemplate before using "+query)
 					}
 				case "setminmaxqua":
 					if _, ok := templatesMap[userID]; ok {
@@ -194,25 +186,33 @@ func main() {
 							templatesMap[userID].Max, err = strconv.Atoi(commands[2])
 							templatesMap[userID].Quantity, err = strconv.Atoi(commands[3])
 							if err != nil {
-								msg := tgbotapi.NewMessage(chatID, "wrong format")
-								bot.Send(msg)
+								sendMessage(bot, chatID, "wrong format")
 							}
 							status(userID, chatID, query, bot)
 						} else {
-							msg := tgbotapi.NewMessage(chatID, "wrong format")
-							bot.Send(msg)
+							sendMessage(bot, chatID, "wrong format")
 						}
 					} else {
-						msg := tgbotapi.NewMessage(chatID, "please use /settemplate before using "+query)
-						bot.Send(msg)
+						sendMessage(bot, chatID, "please use /settemplate before using "+query)
+					}
+				case "random":
+					commands := strings.Split(query, " ")
+					if len(commands) > 3 {
+						min, err := strconv.Atoi(commands[1])
+						max, err := strconv.Atoi(commands[2])
+						if err != nil {
+							sendMessage(bot, chatID, "wrong format")
+						}
+						sendMessage(bot, chatID, strconv.Itoa(rand.Intn(max+1-min)+min))
+					} else {
+						sendMessage(bot, chatID, "wrong format")
 					}
 				case "status":
 					status(userID, chatID, query, bot)
 				case "roll":
 					roll(userID, chatID, query, bot)
 				default:
-					msg := tgbotapi.NewMessage(chatID, help)
-					bot.Send(msg)
+					sendMessage(bot, chatID, help)
 				}
 			}
 		}
@@ -222,13 +222,11 @@ func main() {
 
 func status(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
 	if val, ok := templatesMap[userID]; ok {
-		msg := tgbotapi.NewMessage(chatID, "Your \"random\":\nTemplate: "+val.Name+"\nQuantity: "+strconv.Itoa(int(val.Quantity))+"\nMin: "+
+		sendMessage(bot, chatID, "Your \"random\":\nTemplate: "+val.Name+"\nQuantity: "+strconv.Itoa(int(val.Quantity))+"\nMin: "+
 			strconv.Itoa(val.Min)+"\nMax: "+strconv.Itoa(val.Max)+"\nWords: "+strings.Join(val.Values, ";")+
 			"\n\n/help for help\n/roll for roll")
-		bot.Send(msg)
 	} else {
-		msg := tgbotapi.NewMessage(chatID, "Template not found. Please use /settemplate before using "+query)
-		bot.Send(msg)
+		sendMessage(bot, chatID, "Template not found. Please use /settemplate before using "+query)
 	}
 }
 
@@ -241,23 +239,51 @@ func roll(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
 				if len(val.Values) == 0 {
 					tmp := rand.Intn(val.Max+1-val.Min) + val.Min
 					sum += tmp
-					msgText += strconv.Itoa(tmp) + "\n"
+					if val.Min == 1 && val.Quantity < 3 {
+						switch val.Max {
+						case 4:
+							if len(val.ImagePath) > tmp && val.ImagePath[tmp] != "" {
+								sendImage(bot, chatID, val.ImagePath[tmp])
+							}
+						case 6:
+							if len(val.ImagePath) > tmp && val.ImagePath[tmp] != "" {
+								sendImage(bot, chatID, val.ImagePath[tmp])
+							}
+						case 8:
+							if len(val.ImagePath) > tmp && val.ImagePath[tmp] != "" {
+								sendImage(bot, chatID, val.ImagePath[tmp])
+							}
+						case 10:
+							if len(val.ImagePath) > tmp && val.ImagePath[tmp] != "" {
+								sendImage(bot, chatID, val.ImagePath[tmp])
+							}
+						case 12:
+							if len(val.ImagePath) > tmp && val.ImagePath[tmp] != "" {
+								sendImage(bot, chatID, val.ImagePath[tmp])
+							}
+						case 20:
+							if len(val.ImagePath) > tmp && val.ImagePath[tmp] != "" {
+								sendImage(bot, chatID, val.ImagePath[tmp])
+							}
+						case 100:
+
+						}
+					} else {
+						msgText += strconv.Itoa(tmp) + "\n"
+					}
 				} else {
 					tmp := rand.Intn(len(val.Values))
 					msgText += val.Values[tmp] + "\n"
 				}
 			}
 			msgText += "sum= " + strconv.Itoa(sum) + "\navg= " + strconv.FormatFloat(float64(sum)/float64(val.Quantity), 'f', -4, 32) + "\n/roll again"
-			msg := tgbotapi.NewMessage(chatID, msgText)
-			bot.Send(msg)
-			msg := tgbotapi.NewPhotoUpload(chatID)
+			sendMessage(bot, chatID, msgText)
+
 		} else {
-			msg := tgbotapi.NewMessage(chatID, "please use /setmin or /setmax to change numbers, because your max number less than min, before using "+query)
-			bot.Send(msg)
+			sendMessage(bot, chatID, "please use /setmin or /setmax to change numbers, because your max number less than min, before using "+query)
 		}
 	} else {
-		msg := tgbotapi.NewMessage(chatID, "please use /settemplate before using "+query)
-		bot.Send(msg)
+		sendMessage(bot, chatID, "please use /settemplate before using "+query)
 	}
 }
 
@@ -290,4 +316,14 @@ func parceConfig() (Config, error) {
 		log.Panic(err)
 	}
 	return config, err
+}
+
+func sendMessage(bot *tgbotapi.BotAPI, chatID int64, text string) {
+	msg := tgbotapi.NewMessage(chatID, text)
+	bot.Send(msg)
+}
+
+func sendImage(bot *tgbotapi.BotAPI, chatID int64, imgPath string) {
+	msg := tgbotapi.NewPhotoUpload(chatID, imgPath) //NewInputMediaPhoto(media string)
+	bot.Send(msg)
 }
