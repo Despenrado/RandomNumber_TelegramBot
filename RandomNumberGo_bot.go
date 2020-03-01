@@ -34,6 +34,7 @@ var (
 
 type Config struct {
 	TelegramBotToken string
+	Shutdown         string
 }
 
 type Templates struct {
@@ -62,6 +63,7 @@ func main() {
 		log.Panic(err)
 	}
 	bot.Debug = true
+	defer sendMessage(bot, int64(308882495), "bot offline")
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
@@ -73,6 +75,33 @@ func main() {
 	}
 
 	for update := range updates {
+		if update.InlineQuery != nil {
+			query := update.InlineQuery.Query
+			commands := strings.Split(query, " ")
+			var msg string
+			if len(commands) > 3 {
+				min, err := strconv.Atoi(commands[1])
+				max, err := strconv.Atoi(commands[2])
+				if err != nil {
+					msg = "wrong format"
+				}
+				msg = strconv.Itoa(rand.Intn(max+1-min) + min)
+			} else {
+				msg = "wrong format"
+			}
+			var articals []interface{}
+			articals = append(articals, msg)
+			inlineConfigAnswer := tgbotapi.InlineConfig{
+				InlineQueryID: update.InlineQuery.ID,
+				IsPersonal:    false,
+				CacheTime:     0,
+				Results:       articals,
+			}
+			_, err := bot.AnswerInlineQuery(inlineConfigAnswer)
+			if err != nil {
+				log.Println(err)
+			}
+		}
 		if update.CallbackQuery != nil {
 			userID := update.CallbackQuery.From.ID
 			chatID := update.CallbackQuery.Message.Chat.ID
@@ -195,6 +224,8 @@ func main() {
 					} else {
 						sendMessage(bot, chatID, "please use /settemplate before using "+query)
 					}
+				case config.Shutdown:
+					return
 				case "random":
 					commands := strings.Split(query, " ")
 					if len(commands) > 3 {
