@@ -32,3 +32,8 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[metadata.heroku]
+  root-package = "https://git.heroku.com/telegrambotrandomnumbers.git"
+  go-version = "go1.14"
+  ensure = "true"
