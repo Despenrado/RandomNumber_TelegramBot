@@ -34,6 +34,6 @@
   unused-packages = true
 
 [metadata.heroku]
-  root-package = "https://git.heroku.com/telegrambotrandomnumbers.git"
+  root-package = "https://github.com/Despenrado/RandomNumbers_TelegramBot.git"
   go-version = "go1.14"
   ensure = "true"
