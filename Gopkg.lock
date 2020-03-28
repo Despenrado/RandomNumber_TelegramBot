@@ -10,6 +10,22 @@
   version = "v4.6.4"
 
 [[projects]]
+  branch = "master"
+  digest = "1:01415d74b505e9b518a1055513ac5ceb6fb0c965acee3c7f3e29608729ad38a2"
+  name = "github.com/botanio/sdk"
+  packages = ["go"]
+  pruneopts = "UT"
+  revision = "3bab1dc078b53e1660fe1081e3eee0e24807de74"
+
+[[projects]]
+  digest = "1:b8750bdbfd5302666ccb3e07edcb9239e223e838d47b0cc49496b70791b7187e"
+  name = "github.com/rockneurotiko/gorequest"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "30f504965773bcd6855e423fabea0fc75cdfefef"
+  version = "v0.2.4"
+
+[[projects]]
   digest = "1:420817f94b6c172dabb8a054d0b2d257d7437a87c7c8c7ee432bc008a577fc46"
   name = "github.com/technoweenie/multipartstreamer"
   packages = ["."]
@@ -17,9 +33,48 @@
   revision = "a90a01d73ae432e2611d178c18367fbaa13e0154"
   version = "v1.0.1"
 
+[[projects]]
+  branch = "master"
+  digest = "1:4d02b57b109d7a6a87d9ed6bf8026f32bfb04f86e5bf49e0d81e1c98cf46a965"
+  name = "golang.org/x/net"
+  packages = [
+    "idna",
+    "publicsuffix",
+  ]
+  pruneopts = "UT"
+  revision = "d3edc9973b7eb1fb302b0ff2c62357091cea9a30"
+
+[[projects]]
+  digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
+  name = "golang.org/x/text"
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/language",
+    "internal/language/compact",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable",
+  ]
+  pruneopts = "UT"
+  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
+  version = "v0.3.2"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/Syfaro/telegram-bot-api"]
+  input-imports = [
+    "github.com/Syfaro/telegram-bot-api",
+    "github.com/botanio/sdk/go",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
