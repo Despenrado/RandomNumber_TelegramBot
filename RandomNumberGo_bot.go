@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	botan "github.com/botanio/sdk/go"
 )
 
 var (
@@ -34,6 +35,7 @@ var (
 
 type Config struct {
 	TelegramBotToken string
+	BotanApiToken    string
 	Shutdown         string
 }
 
@@ -50,14 +52,20 @@ type Template struct {
 	ImagePath []string `xml:"ImagePath"`
 }
 
+type Message struct {
+	Text   string
+	ChatId int64
+}
+
 func main() {
 	templatesMap = make(map[int]*Template)
 	templates, _ = parseTemplates()
-
+	var sync chan (bool)
 	config, err := parceConfig()
 	if err != nil {
 		log.Panic(err)
 	}
+	botAnalit := botan.New(config.BotanApiToken)
 	bot, err := tgbotapi.NewBotAPI(config.TelegramBotToken)
 	if err != nil {
 		log.Panic(err)
@@ -78,6 +86,10 @@ func main() {
 		if update.InlineQuery != nil {
 			query := update.InlineQuery.Query
 			commands := strings.Split(query, " ")
+			// botAnalit.trackAsync(1, Message{Text: query, ChatId: update.InlineQuery.ID}, "CallbackQuery", func(ans botan.Answer, err []error) {
+			// 	log.Println(strconv.Itoa(int(chatID)) + ":" + strconv.Itoa(update.InlineQuery.ID) + ":" + query)
+			// 	sync <- true
+			// })
 			var msg string
 			if len(commands) > 3 {
 				min, err := strconv.Atoi(commands[1])
@@ -106,7 +118,10 @@ func main() {
 			userID := update.CallbackQuery.From.ID
 			chatID := update.CallbackQuery.Message.Chat.ID
 			query := update.CallbackQuery.Data
-			log.Println(strconv.Itoa(int(chatID)) + ":" + strconv.Itoa(userID) + ":" + query)
+			botAnalit.TrackAsync(1, Message{Text: query, ChatId: chatID}, "CallbackQuery", func(ans botan.Answer, err []error) {
+				log.Println(strconv.Itoa(int(chatID)) + ":" + strconv.Itoa(userID) + ":" + query)
+				sync <- true
+			})
 			switch query {
 			case "roll":
 				roll(userID, chatID, query, bot)
@@ -127,7 +142,10 @@ func main() {
 			userID := update.Message.From.ID
 			chatID := update.Message.Chat.ID
 			query := update.Message.Text
-			log.Println(strconv.Itoa(int(chatID)) + ":" + strconv.Itoa(userID) + ":" + query)
+			botAnalit.TrackAsync(1, Message{Text: query, ChatId: chatID}, "Message", func(ans botan.Answer, err []error) {
+				log.Println(strconv.Itoa(int(chatID)) + ":" + strconv.Itoa(userID) + ":" + query)
+				sync <- true
+			})
 			var command = ""
 			command = update.Message.Command()
 			if command == "" {
