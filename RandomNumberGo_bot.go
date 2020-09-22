@@ -6,12 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	botan "github.com/botanio/sdk/go"
+	//botan "github.com/botanio/sdk/go"
 )
 
 var (
@@ -60,12 +62,12 @@ type Message struct {
 func main() {
 	templatesMap = make(map[int]*Template)
 	templates, _ = parseTemplates()
-	var sync chan (bool)
+	//var sync chan (bool)
 	config, err := parceConfig()
 	if err != nil {
 		log.Panic(err)
 	}
-	botAnalit := botan.New(config.BotanApiToken)
+	//botAnalit := botan.New(config.BotanApiToken)
 	bot, err := tgbotapi.NewBotAPI(config.TelegramBotToken)
 	if err != nil {
 		log.Panic(err)
@@ -118,10 +120,10 @@ func main() {
 			userID := update.CallbackQuery.From.ID
 			chatID := update.CallbackQuery.Message.Chat.ID
 			query := update.CallbackQuery.Data
-			botAnalit.TrackAsync(1, Message{Text: query, ChatId: chatID}, "CallbackQuery", func(ans botan.Answer, err []error) {
-				log.Println(strconv.Itoa(int(chatID)) + ":" + strconv.Itoa(userID) + ":" + query)
-				sync <- true
-			})
+			// botAnalit.TrackAsync(1, Message{Text: query, ChatId: chatID}, "CallbackQuery", func(ans botan.Answer, err []error) {
+			// 	log.Println(strconv.Itoa(int(chatID)) + ":" + strconv.Itoa(userID) + ":" + query)
+			// 	sync <- true
+			// })
 			switch query {
 			case "roll":
 				roll(userID, chatID, query, bot)
@@ -138,14 +140,13 @@ func main() {
 			}
 		}
 		if update.Message != nil {
-
 			userID := update.Message.From.ID
 			chatID := update.Message.Chat.ID
 			query := update.Message.Text
-			botAnalit.TrackAsync(1, Message{Text: query, ChatId: chatID}, "Message", func(ans botan.Answer, err []error) {
-				log.Println(strconv.Itoa(int(chatID)) + ":" + strconv.Itoa(userID) + ":" + query)
-				sync <- true
-			})
+			// botAnalit.TrackAsync(1, Message{Text: query, ChatId: chatID}, "Message", func(ans botan.Answer, err []error) {
+			// 	log.Println(strconv.Itoa(int(chatID)) + ":" + strconv.Itoa(userID) + ":" + query)
+			// 	sync <- true
+			// })
 			var command = ""
 			command = update.Message.Command()
 			if command == "" {
@@ -194,7 +195,6 @@ func main() {
 							status(userID, chatID, query, bot)
 						} else {
 							sendMessage(bot, chatID, "wrong format")
-
 						}
 					} else {
 						sendMessage(bot, chatID, "please use /settemplate before using "+query)
@@ -260,6 +260,29 @@ func main() {
 					status(userID, chatID, query, bot)
 				case "roll":
 					roll(userID, chatID, query, bot)
+				case "serverip", "nextcloud":
+					var responseString string
+					for {
+						resp, err := http.Get("http://ifconfig.co")
+						if err != nil {
+							log.Println(err)
+							os.Exit(1)
+						}
+						defer resp.Body.Close()
+						respData, err := ioutil.ReadAll(resp.Body)
+						if err != nil {
+							log.Println(err)
+							os.Exit(1)
+						}
+						responseString = string(respData[:len(respData)-1])
+						if net.ParseIP(responseString) != nil {
+							break
+						}
+					}
+					if command == "nextcloud" {
+						responseString = "https://" + responseString + "/nextcloud"
+					}
+					sendMessage(bot, chatID, responseString)
 				default:
 					sendMessage(bot, chatID, help)
 				}
@@ -315,7 +338,6 @@ func roll(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
 								sendImage(bot, chatID, val.ImagePath[tmp])
 							}
 						case 100:
-
 						}
 					} else {
 						msgText += strconv.Itoa(tmp) + "\n"
@@ -327,7 +349,6 @@ func roll(userID int, chatID int64, query string, bot *tgbotapi.BotAPI) {
 			}
 			msgText += "sum= " + strconv.Itoa(sum) + "\navg= " + strconv.FormatFloat(float64(sum)/float64(val.Quantity), 'f', -4, 32) + "\n/roll again"
 			sendMessage(bot, chatID, msgText)
-
 		} else {
 			sendMessage(bot, chatID, "please use /setmin or /setmax to change numbers, because your max number less than min, before using "+query)
 		}
