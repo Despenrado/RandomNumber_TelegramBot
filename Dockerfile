@@ -1,14 +1,7 @@
-FROM golang
-
-RUN mkdir /app
-
-ADD . /app/
-
-WORKDIR /app
-
-RUN go get github.com/botanio/sdk/go 
-RUN go get github.com/Syfaro/telegram-bot-api
-
-RUN go build -o RandomNumberGo_bot .
-
-CMD ["/app/RandomNumberGo_bot"]
+FROM scratch
+ADD ca-certificates.crt /etc/ssl/certs/
+ADD RandomNumberGo_bot /
+ADD config.json /
+ADD resources.xml /
+CMD ["chmod", "+x", "/RandomNumberGo_bot"]
+CMD ["/RandomNumberGo_bot"]
