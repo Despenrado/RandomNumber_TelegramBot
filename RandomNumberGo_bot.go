@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	templatesMap map[int]*Template
+	templatesMap map[int]*Dice
 	help         = "help message:\n" +
 		"structure of queries: /command [parametr] [parametr] ....\n" +
 		"example: /setmin 10 - this command sets minimum border to 10\n\n" +
@@ -42,10 +42,10 @@ type Config struct {
 }
 
 type Templates struct {
-	Template []Template `xml:"Template"`
+	Template []Dice `xml:"Template"`
 }
 
-type Template struct {
+type Dice struct {
 	Name      string   `xml:"Name"`
 	Min       int      `xml:"Min"`
 	Max       int      `xml:"Max"`
@@ -60,7 +60,7 @@ type Message struct {
 }
 
 func main() {
-	templatesMap = make(map[int]*Template)
+	templatesMap = make(map[int]*Dice)
 	templates, _ = parseTemplates()
 	//var sync chan (bool)
 	config, err := parceConfig()
